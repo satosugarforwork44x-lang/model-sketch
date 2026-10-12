@@ -1,0 +1,2 @@
+# Model Sketch に Python の依存はありません。
+# 3D の表示（three.js）と形の計算（manifold の WebAssembly 版）は ui/vendor/ に同梱していて、Hub の画面の中で動きます。

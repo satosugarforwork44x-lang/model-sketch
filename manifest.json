@@ -1,0 +1,31 @@
+{
+  "id": "model",
+  "name": "モデルスケッチ",
+  "version": "0.2.0",
+  "summary": "3D（STL・3MF・OBJ・GLB）をすぐ見て、断面で中を確かめ、ピンで直したい所を示す。Claude がレシピで形を足す（ふた・穴など）。面に色を塗り、ゲーム用の GLB はパレット画像で書き出す。3D プリントとゲームの素材づくりに",
+  "kind": "panel",
+  "runtime": "python",
+  "api": "api.py",
+  "visibility": "public",
+  "requires": { "hub": ">=0.8", "moduleApi": 1 },
+  "hub": {
+    "window": "panel",
+    "size": [1180, 780],
+    "ui": "ui/panel.js",
+    "tile": { "icon": "cube" },
+    "opens": [".stl", ".3mf", ".obj", ".glb"],
+    "blob": "blob_path",
+    "upload": ["save_out"]
+  },
+  "exports": [
+    { "fn": "state", "summary": "保存先・モデルの一覧" },
+    { "fn": "add_files", "summary": "3D ファイルから新しいモデルスケッチを作る" },
+    { "fn": "new_model", "summary": "元のファイル無しで始める（レシピで作る）" },
+    { "fn": "open_model", "summary": "モデルスケッチを開く" },
+    { "fn": "save_model", "summary": "モデルスケッチを保存する" },
+    { "fn": "poll", "summary": "外で書き換えられたか（更新時刻）" },
+    { "fn": "relink", "summary": "見つからない元のファイルの場所を指定し直す" },
+    { "fn": "reveal", "summary": "保存先・書き出したファイルをエクスプローラーで見せる" }
+  ],
+  "locales": { "en": { "name": "Model Sketch", "summary": "Open 3D files (STL, 3MF, OBJ, GLB) instantly, look inside with a section cut, and pin what to change. Claude adds shapes (lids, holes…) as a recipe. Paint faces; game GLBs are exported with a palette texture. For 3D printing and game assets" } }
+}

@@ -1,0 +1,158 @@
+/* モデルスケッチ。色は Hub の CSS 変数だけを使う */
+.mo { position: absolute; inset: 0; display: flex; flex-direction: column; min-height: 0; }
+.mo-home[hidden], .mo-edit[hidden] { display: none; }
+
+/* ---- 一覧 ---- */
+.mo-home { flex: 1; overflow: auto; padding: 18px 20px 24px; }
+.mo-drop {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 20px;
+  border: 1.5px dashed var(--ink-4); border-radius: var(--r-l); background: var(--dots), var(--ink-2); text-align: center;
+}
+.mo-drop > .icon { width: 36px; height: 36px; color: var(--muted); }
+.mo-drop .t { margin: 4px 0 0; font-size: 15px; color: var(--text); }
+.mo-drop .n { margin: 0 0 8px; color: var(--muted); font-size: 12px; }
+.mo-drop .row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.mo-h { margin: 22px 2px 10px; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+.mo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.mo-none { color: var(--faint); margin: 4px 2px; font-size: 12px; line-height: 1.6; }
+.mo-card {
+  display: flex; flex-direction: column; gap: 6px; padding: 6px; border: 0; border-radius: var(--r);
+  background: var(--ink-2); color: var(--text); font: inherit; text-align: left; cursor: pointer; transition: background .15s, transform .15s;
+}
+.mo-card:hover { background: var(--ink-3); transform: translateY(-1px); }
+.mo-card .thumb { position: relative; aspect-ratio: 4 / 3; border-radius: calc(var(--r) - 4px); overflow: hidden; background: var(--well); display: grid; place-items: center; }
+.mo-card .thumb .icon { width: 30px; height: 30px; color: var(--faint); }
+.mo-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.mo-card .nm { padding: 0 4px 2px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---- 編集 ---- */
+.mo-edit { flex: 1; display: grid; grid-template-columns: 56px 1fr 272px; min-height: 0; }
+.mo-rail { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 0; border-right: 1px solid var(--line); }
+.mo-tool {
+  position: relative; width: 40px; height: 40px; display: grid; place-items: center; border: 0; border-radius: var(--r);
+  background: transparent; color: var(--muted); cursor: pointer; transition: background .15s, color .15s;
+}
+.mo-tool .icon { width: 20px; height: 20px; }
+.mo-tool kbd { position: absolute; right: 3px; bottom: 2px; font: 600 9px/1 var(--font-num); color: var(--faint); background: none; border: 0; padding: 0; }
+.mo-tool:hover { background: var(--ink-3); color: var(--text); }
+.mo-tool[aria-pressed="true"] { background: var(--tint); color: var(--text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--signal) 55%, transparent); }
+
+.mo-stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: var(--dots), var(--well); }
+.mo-gl { position: absolute; inset: 0; }
+.mo-gl canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.mo-stage[data-tool="P"] canvas, .mo-stage[data-tool="M"] canvas { cursor: crosshair; }
+.mo-top { position: absolute; left: 12px; top: 12px; }
+.mo-top .seg { width: 220px; box-shadow: var(--shadow), inset 0 0 0 1px var(--line); background: var(--solid-2); }
+.mo-views {
+  position: absolute; right: 12px; top: 12px; display: flex; gap: 2px; padding: 3px; border-radius: var(--pill);
+  background: var(--solid-2); box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
+}
+.mo-vbtn {
+  min-width: 30px; height: 30px; padding: 0 8px; border: 0; border-radius: var(--pill); background: transparent; color: var(--muted);
+  font: 600 12px/1 var(--font); cursor: pointer; display: grid; place-items: center; transition: background .15s, color .15s;
+}
+.mo-vbtn .icon { width: 16px; height: 16px; }
+.mo-vbtn:hover { background: var(--ink-3); color: var(--text); }
+.mo-dims { position: absolute; left: 12px; bottom: 12px; display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; }
+.mo-dims span {
+  padding: 6px 11px; border-radius: var(--pill); background: var(--solid-2); box-shadow: var(--shadow), inset 0 0 0 1px var(--line);
+  font: 12px/1 var(--font-num); color: var(--text);
+}
+.mo-dims .fit.ok { color: var(--muted); }
+.mo-dims .fit.ng { color: var(--danger); box-shadow: var(--shadow), inset 0 0 0 1px color-mix(in srgb, var(--danger) 60%, transparent); }
+.mo-msg {
+  position: absolute; inset: 0; margin: auto; width: min(420px, 80%); height: max-content; padding: 20px; border-radius: var(--r-l);
+  background: var(--solid-2); box-shadow: var(--shadow); text-align: center; color: var(--muted);
+}
+.mo-msg p { margin: 0 0 6px; }
+.mo-msg code { display: block; margin: 6px 0 14px; padding: 6px 8px; border-radius: var(--r-s); background: var(--well); color: var(--code-text); font-size: 11px; word-break: break-all; }
+
+/* ピン・測る（画面の上に重ねる） */
+.mo-pins { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.mo-pin {
+  position: absolute; left: 0; top: 0; width: 24px; height: 24px; margin: -12px 0 0 -12px; padding: 0; border: 2px solid #111; border-radius: 50%;
+  background: #FFD60A; color: #111; font: 700 12px/1 var(--font-num); display: grid; place-items: center; cursor: pointer; pointer-events: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .35); transition: opacity .15s, box-shadow .15s;
+}
+.mo-pin.back { opacity: .45; }
+.mo-pin.on { box-shadow: 0 0 0 3px var(--signal), 0 2px 8px rgba(0, 0, 0, .35); opacity: 1; }
+.mo-pin[hidden] { display: none; }
+.mo-measure {
+  position: absolute; left: 0; top: 0; translate: -50% -140%; padding: 4px 9px; border-radius: var(--pill);
+  background: var(--solid-2); box-shadow: var(--shadow), inset 0 0 0 1px var(--signal); font: 600 12px/1 var(--font-num); color: var(--text); white-space: nowrap;
+}
+.mo-measure[hidden] { display: none; }
+
+/* ---- 右の欄 ---- */
+.mo-side { display: flex; flex-direction: column; min-height: 0; border-left: 1px solid var(--line); overflow: auto; }
+.mo-side section { padding: 12px 12px 14px; }
+.mo-side section + section { border-top: 1px solid var(--line); }
+.mo-side h3 { margin: 0 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--muted); }
+.mo-note p { margin: 0; padding: 8px 10px; border-radius: var(--r); background: var(--tint); font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+.mo-parts ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.mo-part { display: flex; align-items: center; gap: 6px; height: 34px; padding: 0 8px 0 2px; border-radius: var(--r-s); }
+.mo-part:hover { background: var(--ink-2); }
+.mo-part .icon-btn { width: 28px; height: 28px; }
+.mo-part .nm { flex: 0 1 auto; min-width: 3.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-num); font-size: 12px; }
+.mo-part .ty { flex: 1 1 0; min-width: 0; text-align: right; font-size: 10.5px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mo-part.off .nm { color: var(--faint); }
+.mo-chip { width: 16px; height: 16px; flex: none; padding: 0; border: 0; border-radius: 50%; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); }
+.mo-sw-dot { display: inline-block; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .3); }
+.mo-sw { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12.5px; margin: 2px 0 8px; cursor: pointer; }
+.mo-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.mo-row .seg { flex: 1; }
+.mo-row .icon-btn[aria-pressed="true"] { color: var(--signal); background: var(--tint); }
+.mo-secbody[hidden] { display: none; }
+.mo-range { flex: 1; min-width: 0; accent-color: var(--primary); }
+.mo-num { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); }
+.mo-num input {
+  width: 64px; height: 26px; padding: 0 6px; border: 0; border-radius: var(--r-s); background: var(--well); color: var(--text);
+  font: 12px var(--font-num); box-shadow: inset 0 0 0 1px var(--line);
+}
+.mo-num input:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--primary); }
+.mo-bed .mo-num input { width: 54px; }
+.mo-scale { flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.mo-scale .mo-num input { width: 70px; }
+.mo-lab { font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+.mo-setup .select { width: 100%; margin-bottom: 10px; }
+.mo-pinrow { display: grid; grid-template-columns: auto 1fr auto; gap: 6px; align-items: start; padding: 6px; border-radius: var(--r); }
+.mo-pinrow + .mo-pinrow { margin-top: 2px; }
+.mo-pinrow.on { background: var(--tint); }
+.mo-badge {
+  width: 22px; height: 22px; margin-top: 3px; padding: 0; border: 2px solid #111; border-radius: 50%; background: #FFD60A; color: #111;
+  font: 700 11px/1 var(--font-num); cursor: pointer;
+}
+.mo-pinrow textarea {
+  width: 100%; min-height: 44px; resize: vertical; padding: 6px 8px; border: 0; border-radius: var(--r-s); background: var(--well);
+  color: var(--text); font: 12px/1.5 var(--font); box-shadow: inset 0 0 0 1px var(--line);
+}
+.mo-pinrow textarea:focus { outline: none; box-shadow: inset 0 0 0 1.5px var(--primary); }
+.mo-pinrow .icon-btn { width: 28px; height: 28px; }
+.mo-param { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; margin-bottom: 10px; }
+.mo-param .lb { grid-column: 1 / -1; font-size: 12px; color: var(--text); }
+.mo-steps { margin: 0; font-size: 12px; color: var(--muted); }
+.mo-err { margin: 6px 0 0; padding: 6px 8px; border-radius: var(--r-s); font-size: 11.5px; line-height: 1.5; color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); }
+.mo-info dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 12px; }
+.mo-info dt { color: var(--muted); }
+.mo-info dd { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-num); }
+
+@media (prefers-reduced-motion: reduce) { .mo-card, .mo-tool, .mo-pin, .mo-vbtn { transition: none; } }
+
+/* ---- 塗る ---- */
+.mo-stage[data-tool="B"] canvas { cursor: crosshair; }
+.mo-paint .seg { margin-bottom: 10px; }
+.mo-palette { display: grid; grid-template-columns: repeat(9, 1fr); gap: 6px; }
+.mo-swatch {
+  position: relative; aspect-ratio: 1; width: 100%; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); transition: transform .12s, box-shadow .12s; display: grid; place-items: center;
+}
+.mo-swatch:hover { transform: scale(1.1); }
+.mo-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--solid-2), 0 0 0 4px var(--signal); }
+.mo-swatch.eraser { background: var(--well); color: var(--muted); }
+.mo-swatch.eraser .icon { width: 14px; height: 14px; }
+.mo-swatch.custom { background: conic-gradient(#E5534B, #E3B341, #57AB5A, #56B6C2, #539BF5, #B083F0, #E5534B); overflow: hidden; }
+.mo-swatch.custom input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.mo-paint .mo-lab { margin: 0; white-space: nowrap; }
+.mo-clear { margin-top: 10px; }
+.mo-paint .mo-none { margin-top: 10px; }
+@media (prefers-reduced-motion: reduce) { .mo-swatch { transition: none; } }
