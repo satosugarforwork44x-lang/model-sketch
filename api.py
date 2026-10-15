@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import tempfile
 import zipfile
 from io import BytesIO
@@ -342,6 +343,48 @@ def relink(name: str, path: str) -> dict:
     data["doc"]["source"] = new_doc(p.resolve())["source"]
     save_model(name, data["doc"])
     return open_model(name)
+
+
+def _discard(p: Path) -> None:
+    """ごみ箱へ送る。send2trash が無い環境では保存先の _to_delete へ移す（完全には消さない。Hub のフォルダ窓と同じ）。"""
+    try:
+        from send2trash import send2trash
+        send2trash(str(p))
+    except ImportError:
+        bin_dir = _folder() / "_to_delete"
+        bin_dir.mkdir(exist_ok=True)
+        shutil.move(str(p), str(_unique(bin_dir / p.name)))
+
+
+def delete_model(name: str) -> dict:
+    """モデルスケッチを消す（ごみ箱へ）。<名前>.model.json・_ai の画像と数値・一覧の小さな画像・「最後に開いたもの」の記録。
+    元の 3D ファイルと export の書き出しは残す（利用者のファイル・成果物なので）。"""
+    p = _path(name)
+    if not p.exists():
+        raise ModelError(f"見つかりません: {name}")
+    folder = _folder()
+    targets = [p, folder / AI_DIR / f"{name}.png", folder / AI_DIR / f"{name}.json"]
+    trashed, errors = [], []
+    for t in targets:
+        if not t.is_file():
+            continue
+        try:
+            _discard(t)
+            trashed.append(f"{t.parent.name}/{t.name}" if t.parent != folder else t.name)
+        except OSError as e:
+            errors.append(f"{t.name}: {e}")
+    if p.exists():
+        raise ModelError(f"消せませんでした: {'; '.join(errors) or p.name}")
+    (_thumbs() / f"{name}.png").unlink(missing_ok=True)     # 一覧の小さな画像は作り直せるので、そのまま消す
+    if _ctx.store.get("model", "current", None) == name:
+        _ctx.store.set("model", "current", None)
+    exp = folder / EXPORT_DIR
+    kept = sorted(x.name for x in exp.glob(f"{glob_escape(name)}*") if x.is_file() and x.suffix.lower() in (".stl", ".3mf", ".glb")) if exp.is_dir() else []
+    return {"trashed": trashed, "errors": errors, "keptExports": kept}
+
+
+def glob_escape(s: str) -> str:
+    return re.sub(r"([*?\[])", r"[\1]", s)
 
 
 def reveal(name: str | None = None, kind: str = "", file: str = "") -> bool:

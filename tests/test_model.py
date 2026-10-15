@@ -148,6 +148,43 @@ class ModelTest(unittest.TestCase):
             with self.assertRaises(self.api.ModelError):
                 self.api.blob_path(key)
 
+    def test_delete_moves_sketch_and_ai_files_but_keeps_source_and_exports(self):
+        import sys, types
+        name = self.api.add_files([str(self.src)])["made"][0]
+        folder = Path(self.api.state()["folder"])
+        self.api.save_out(json.dumps({"a": 1}).encode(), name=name, kind="ai", format="json")
+        self.api.save_out(b"\x89PNG\r\n\x1a\n" + b"0" * 8, name=name, kind="ai", format="png")
+        self.api.save_out(b"\x89PNG\r\n\x1a\n" + b"0" * 8, name=name, kind="thumb", format="png")
+        self.api.save_out(_stl(1), name=name, kind="export", format="stl")
+        sys.modules["send2trash"] = None            # ごみ箱が使えない環境 → _to_delete へ
+        try:
+            r = self.api.delete_model(name)
+        finally:
+            sys.modules.pop("send2trash", None)
+        self.assertEqual(sorted(r["trashed"]), sorted([f"{name}.model.json", f"_ai/{name}.png", f"_ai/{name}.json"]))
+        self.assertEqual(r["keptExports"], [f"{name}.stl"])
+        self.assertFalse((folder / f"{name}.model.json").exists())
+        self.assertTrue((folder / "_to_delete" / f"{name}.model.json").exists())
+        self.assertTrue(self.src.exists())                                  # 元のファイルは残る
+        self.assertTrue((folder / "export" / f"{name}.stl").exists())       # 書き出しも残る
+        self.assertNotIn(name, self.api.state()["files"])
+        self.assertIsNone(self.api.state()["current"])
+        with self.assertRaises(self.api.ModelError):
+            self.api.blob_path(f"thumb-{name}")
+
+    def test_delete_uses_recycle_bin_when_available(self):
+        import sys, types
+        name = self.api.add_files([str(self.src)])["made"][0]
+        sent = []
+        sys.modules["send2trash"] = types.SimpleNamespace(send2trash=lambda p: (sent.append(p), Path(p).unlink()))
+        try:
+            self.api.delete_model(name)
+        finally:
+            sys.modules.pop("send2trash", None)
+        self.assertEqual([Path(p).name for p in sent], [f"{name}.model.json"])
+        with self.assertRaises(self.api.ModelError):
+            self.api.delete_model(name)
+
     def test_bad_names_rejected(self):
         for bad in ("a/b", "..", " x", "a:b"):
             with self.assertRaises(self.api.ModelError):

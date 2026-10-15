@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 — 2026-10-16
+- **Delete a model sketch**: the trash button on a card in the list (or right-click), or *Delete this model sketch* at the bottom of the side panel. Click twice to confirm
+- Sends `<name>.model.json` and its AI files (`_ai/<name>.png`, `.json`) to the Recycle Bin (or a `_to_delete` folder when the Recycle Bin is not available), removes the list thumbnail and clears "last opened". The original 3D file and exports are kept
+
 ## 0.2.0 — 2026-10-12
 - **Paint**: flat face, brush and whole-part modes, eraser, eyedropper (`Alt` + click). Paint is stored as steps (`paint`) so it survives recomputing, and Claude can paint the same way
 - **Materials**: plastic, matte, glossy, metal (with a soft room reflection)

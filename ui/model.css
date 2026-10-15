@@ -156,3 +156,17 @@
 .mo-clear { margin-top: 10px; }
 .mo-paint .mo-none { margin-top: 10px; }
 @media (prefers-reduced-motion: reduce) { .mo-swatch { transition: none; } }
+
+/* ---- 消す ---- */
+.mo-cardwrap { position: relative; }
+.mo-cardwrap .mo-card { width: 100%; }
+.mo-del {
+  position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; opacity: 0; border-radius: 50%;
+  background: var(--solid-2); box-shadow: var(--shadow); transition: opacity .15s, background .15s, color .15s;
+}
+.mo-del .icon { width: 15px; height: 15px; }
+.mo-cardwrap:hover .mo-del, .mo-del:focus-visible, .mo-del.arm { opacity: 1; }
+.mo-del.arm, .mo-delbtn.arm { background: var(--danger); color: #fff; }
+.mo-delbtn { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; color: var(--danger); }
+.mo-delbtn .icon { width: 15px; height: 15px; }
+@media (prefers-reduced-motion: reduce) { .mo-del { transition: none; } }

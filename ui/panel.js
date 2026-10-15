@@ -39,6 +39,9 @@ const L = EN ? {
   ex: { stl: "STL (all in one)", stlEach: "STL (one file per part)", "3mf": "3MF (parts as objects)", glb: "GLB (game: m, Y up)" },
   nothing: "Nothing to export (all parts are hidden)", pinHere: "Pin here", hidePart: "Hide this part", cutHere: "Section here",
   measure: (d) => `${d} mm`, note: "Note from Claude",
+  del: "Delete", delThis: "Delete this model sketch", delAgain: "Click again to delete",
+  delNote: "Goes to the Recycle Bin. The original 3D file and your exports are kept.",
+  deleted: (n, k) => `Moved “${n}” to the Recycle Bin${k ? ` (kept ${k} exported file${k > 1 ? "s" : ""})` : ""}`,
   paint: "Paint", pmode: { face: "Flat face", brush: "Brush", part: "Part" }, eraser: "Eraser (back to the part color)", custom: "Pick any color",
   brushSize: "Brush size", clearPaint: "Remove all paint", painted: "painted", material: "Material",
   mats: { plastic: "Plastic", matte: "Matte", gloss: "Glossy", metal: "Metal" },
@@ -72,6 +75,9 @@ const L = EN ? {
   ex: { stl: "STL（全部を 1 つに）", stlEach: "STL（部品ごとに 1 つ）", "3mf": "3MF（部品ごとの物体）", glb: "GLB（ゲーム用: m・Y が上）" },
   nothing: "書き出す物がありません（部品がすべて隠れています）", pinHere: "ここにピン", hidePart: "この部品を隠す", cutHere: "ここで断面",
   measure: (d) => `${d} mm`, note: "Claude からのひとこと",
+  del: "消す", delThis: "このモデルスケッチを消す", delAgain: "もう一度押すと消します",
+  delNote: "ごみ箱へ送ります。元の 3D ファイルと書き出したファイルは残ります。",
+  deleted: (n, k) => `「${n}」をごみ箱へ送りました${k ? `（書き出した ${k} 個のファイルは残しています）` : ""}`,
   paint: "塗る", pmode: { face: "平らな面", brush: "筆", part: "部品ごと" }, eraser: "消しゴム（部品の色に戻す）", custom: "好きな色を選ぶ",
   brushSize: "筆の大きさ", clearPaint: "塗りを全部消す", painted: "塗りあり", material: "材質",
   mats: { plastic: "プラスチック", matte: "つや消し", gloss: "光沢", metal: "金属" },
@@ -188,10 +194,52 @@ export async function mount(el, ctx) {
       im.addEventListener("error", () => im.remove());
       b.querySelector(".nm").textContent = f;
       b.addEventListener("click", () => open(f));
-      grid.append(b);
+      b.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        ctx.contextMenu([{ label: L.del, icon: IC.trash, onClick: () => removeModel(f) }], e.clientX, e.clientY);
+      });
+      const wrap = document.createElement("div");
+      wrap.className = "mo-cardwrap";
+      const del = document.createElement("button");
+      del.className = "icon-btn mo-del";
+      del.innerHTML = IC.trash;
+      del.title = `${L.del} — ${L.delNote}`;
+      del.setAttribute("aria-label", `${L.del}: ${f}`);
+      armDelete(del, () => removeModel(f));
+      wrap.append(b, del);
+      grid.append(wrap);
     }
   }
   async function refresh() { st = await ctx.call("state"); }
+
+  // ---------- 消す（ごみ箱へ） ----------
+  /** 2 回押しで実行するボタンにする（1 回目は「もう一度押すと消します」、3 秒で元に戻る） */
+  function armDelete(btn, run) {
+    let timer = null;
+    const label = btn.title;
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (btn.classList.contains("arm")) { clearTimeout(timer); btn.classList.remove("arm"); return run(); }
+      btn.classList.add("arm");
+      btn.title = L.delAgain;
+      if (btn.dataset.text !== undefined) btn.querySelector("span").textContent = L.delAgain;
+      timer = setTimeout(() => {
+        btn.classList.remove("arm"); btn.title = label;
+        if (btn.dataset.text !== undefined) btn.querySelector("span").textContent = btn.dataset.text;
+      }, 3000);
+    });
+  }
+  async function removeModel(n) {
+    try {
+      if (n === name) { clearTimeout(saveTimer); saveTimer = null; }     // 消すものを保存し直さない
+      const r = await ctx.call("delete_model", { name: n });
+      if (r.errors?.length) ctx.toast(r.errors.join(" / "), "error", 6000);
+      ctx.toast(L.deleted(n, r.keptExports?.length || 0), "info", 5000);
+      if (n === name) { name = null; doc = null; }
+      await refresh();
+      showHome();
+    } catch (e) { ctx.toast(e.message, "error"); }
+  }
   async function addFiles(paths) {
     try {
       const r = await ctx.call("add_files", { paths });
@@ -891,6 +939,14 @@ export async function mount(el, ctx) {
       else add(L.origin, L.originV);
     }
     s.append(dl);
+    const del = document.createElement("button");
+    del.className = "btn mo-delbtn";
+    del.dataset.text = L.delThis;
+    del.innerHTML = `${IC.trash}<span></span>`;
+    del.querySelector("span").textContent = L.delThis;
+    del.title = L.delNote;
+    armDelete(del, () => removeModel(name));
+    s.append(del);
   }
 
   // ---------- 形の上での操作 ----------

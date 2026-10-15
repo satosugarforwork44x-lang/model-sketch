@@ -59,6 +59,7 @@ So Model Sketch is a **3D sketch table that sits in Hub**, one click away. It de
 | **Print helpers** | Overhang view (over 45°), volume |
 | **Export** (`Ctrl+E`) | STL (one file or one per part), 3MF (parts as objects, mm), GLB (metres, Y-up, origin at the bottom centre, palette texture) |
 | **Start empty** | No file needed: ask Claude to build a part or a prop from a recipe |
+| **Delete** | Trash button on a card (or right-click), or at the bottom of the side panel; click twice. Goes to the Recycle Bin with its AI files — the original 3D file and exports are kept |
 | **English & Japanese** | The panel is available in both languages |
 
 ![Painting a recipe-only low-poly house for a game](docs/paint.png)

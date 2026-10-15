@@ -1,7 +1,7 @@
 {
   "id": "model",
   "name": "モデルスケッチ",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "summary": "3D（STL・3MF・OBJ・GLB）をすぐ見て、断面で中を確かめ、ピンで直したい所を示す。Claude がレシピで形を足す（ふた・穴など）。面に色を塗り、ゲーム用の GLB はパレット画像で書き出す。3D プリントとゲームの素材づくりに",
   "kind": "panel",
   "runtime": "python",
@@ -24,6 +24,7 @@
     { "fn": "open_model", "summary": "モデルスケッチを開く" },
     { "fn": "save_model", "summary": "モデルスケッチを保存する" },
     { "fn": "poll", "summary": "外で書き換えられたか（更新時刻）" },
+    { "fn": "delete_model", "summary": "モデルスケッチを消す（ごみ箱へ。元の 3D ファイルと書き出しは残す）" },
     { "fn": "relink", "summary": "見つからない元のファイルの場所を指定し直す" },
     { "fn": "reveal", "summary": "保存先・書き出したファイルをエクスプローラーで見せる" }
   ],
